@@ -1,0 +1,11 @@
+*~
+*.o
+*.old
+*.c
+*.bs
+*.zip
+MYMETA.json
+MYMETA.yml
+Makefile
+blib
+pm_to_blib

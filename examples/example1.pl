@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+use ExtUtils::testlib;
+use Keystone ':all';
+
+use strict;
+use warnings;
+
+my @asm = ("push rbp",
+           "mov rdx, rdi",
+           "int 0x80",
+           "inc rdx",
+           "mov eax, 0x12345678",
+           "mov bx, 5");
+
+# Open a Keystone object
+my $ks = Keystone->new(KS_ARCH_X86, KS_MODE_64) ||
+    die "[-] Can't open Keystone\n";
+
+
+for my $ins(@asm) {
+
+    # Assemble...
+    my @opcodes = $ks->asm($ins);
+
+    # Print opcodes
+    printf "%-20s %s\n", join(' ', map {sprintf "%.2x", $_} @opcodes), $ins;
+}
