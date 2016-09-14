@@ -51,6 +51,32 @@ sub asm {
     return @ops;
 }
 
+sub errno {
+    my $this = shift;
+
+    return Keystone::ks_errno($this->{_handle});
+}
+
+# Can be used as static and non static method
+sub strerror {
+    my $arg = shift;
+
+    if(ref($arg)) {
+        return Keystone::ks_strerror($arg->errno());
+    }
+
+    return Keystone::ks_strerror($arg);
+}
+
+# Static methods
+sub version {
+    return Keystone::ks_version();
+}
+
+sub arch_supported {
+    return Keystone::ks_arch_supported($_[0]);
+}
+
 1;
 
 __END__
@@ -64,7 +90,7 @@ Keystone - Perl extension for keystone-engine
   use Keystone ':all';
 
   $ks = Keystone->new(KS_ARCH_X86, KS_MODE_64) || die "Can't init Keystone\n";
-  @opcodes = $ks->asm("pop rax; inc rbx; ret", 0x040000a);
+  @opcodes = $ks->asm("pop rax; inc rbx; ret");
 
   foreach(@opcodes) {
     printf "0x%.2x ", $_;
@@ -74,7 +100,7 @@ Keystone - Perl extension for keystone-engine
 
 =head1 DESCRIPTION
 
-This module is a Perl wrapper of the keystone-engine library.
+This module is a Perl wrapper for the keystone-engine library.
 
 Keystone is a lightweight multi-platform, multi-architecture assembler framework.
 
@@ -92,13 +118,65 @@ Create a new keystone object.
 Take two arguments, the arch (KS_ARCH_*) and the mode (KS_MODE_*).
 See ks_open() in keystone-engine documentation
 
+=back
+
+=over 4
+
 =item asm(code, address)
 
-  @opcodes = $ks->asm("pop rax; ret", 0x080480bc);
+  @opcodes = $ks->asm("pop rax; ret");
 
 Assemble code, and return a list of opcodes.
 
 See ks_asm() in keystone-engine documentation.
+
+=back
+
+=over 4
+
+=item strerror()
+
+   printf "%s\n", $ks->strerror();
+
+Get the last error string
+
+See ks_strerror() in keystone-engine documentation.
+
+=back
+
+=over 4
+
+=item errno()
+
+   printf "%d\n", $ks->errno();
+
+Get the last error code (KS_ERR_* constants)
+
+See ks_errno() in keystone-engine documentation.
+
+=back
+
+=head2 FUNCTIONS
+
+=over 4
+
+=item version()
+
+  ($maj, $min) = Keystone::version();
+
+Get the major and the minor version of the Keystone engine.
+See ks_version() in keystone-engine documentation
+
+=back
+
+=over 4
+
+=item arch_supported(arch)
+
+  printf "%d\n", Keystone::arch_supported(KS_ARCH_X86);
+
+Return 1 if the KS_ARCH_* is supported, 0 overwise.
+See ks_arch_supported() in keystone-engine documentation
 
 =back
 
@@ -111,6 +189,31 @@ See ks_asm() in keystone-engine documentation.
 
   use strict;
   use warnings;
+
+  my @asm = ("push ebp",
+             "mov rdx, rdi",
+             "int 0x80",
+             "inc rdx",
+             "mov eax, 0x12345678",
+             "mov bx, 5");
+
+  # Open a Keystone object
+  my $ks = Keystone->new(KS_ARCH_X86, KS_MODE_64) ||
+      die "[-] Can't open Keystone\n";
+
+
+  for my $ins(@asm) {
+
+      # Assemble...
+      my @opcodes = $ks->asm($ins);
+
+      if(!scalar(@opcodes)) {
+          printf "Assembly failed (\"$ins\") : %s\n", $ks->strerror();
+      } else {
+          # Print opcodes
+          printf "%-20s %s\n", join(' ', map {sprintf "%.2x", $_} @opcodes), $ins;
+      }
+  }
 
 =head1 SEE ALSO
 

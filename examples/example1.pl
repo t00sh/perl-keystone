@@ -6,7 +6,7 @@ use Keystone ':all';
 use strict;
 use warnings;
 
-my @asm = ("push rbp",
+my @asm = ("push ebp",
            "mov rdx, rdi",
            "int 0x80",
            "inc rdx",
@@ -23,6 +23,10 @@ for my $ins(@asm) {
     # Assemble...
     my @opcodes = $ks->asm($ins);
 
-    # Print opcodes
-    printf "%-20s %s\n", join(' ', map {sprintf "%.2x", $_} @opcodes), $ins;
+    if(!scalar(@opcodes)) {
+        printf "Assembly failed (\"$ins\") : %s\n", $ks->strerror();
+    } else {
+        # Print opcodes
+        printf "%-20s %s\n", join(' ', map {sprintf "%.2x", $_} @opcodes), $ins;
+    }
 }
