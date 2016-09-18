@@ -13,6 +13,9 @@ my @asm = ("push ebp",
            "mov eax, 0x12345678",
            "mov bx, 5");
 
+# Print Keystone version
+printf "Keystone version %d.%d\n\n", Keystone::version();
+
 # Open a Keystone object
 my $ks = Keystone->new(KS_ARCH_X86, KS_MODE_64) ||
     die "[-] Can't open Keystone\n";

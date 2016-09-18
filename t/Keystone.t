@@ -3,8 +3,8 @@ use warnings;
 
 use Test::More tests => 3;
 
-BEGIN { use_ok('Capstone', ':all'); }
+BEGIN { use_ok('Keystone', ':all'); }
 
-ok(join('.',Capstone::version()) eq '3.0');
+ok(join('.',Keystone::version()) eq '0.9');
 
-ok(Capstone::support(CS_ARCH_ALL));
+ok(Keystone::arch_supported(KS_ARCH_X86));
