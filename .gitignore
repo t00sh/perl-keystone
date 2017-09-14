@@ -4,6 +4,8 @@
 *.c
 *.bs
 *.zip
+*.gz
+pkgs
 MYMETA.json
 MYMETA.yml
 Makefile
